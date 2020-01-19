@@ -1,27 +1,43 @@
 ;(function(){
+    var _option = {}
+    var timer;
 
-    //滚动条、滑块类名、默认样式
-    var scrollbarClassName = 'l-scrollbar';
-    var sliderClassName = 'l-slider';
-    var scrollbarStyle = {
-        width: '10px',
-        color: '#f0f0f0',
-        position: 'absolute',
-        top: '5px',
-        right: '5px',
-        borderRadius: '5px'
-    }
-    var sliderStyle = {
-        width: '10px',
-        color: 'rgb(209,209,209)',
-        position: 'absolute',
-        borderRadius: '5px',
-        top: '0px',
-        left: '50%',
-        transform: 'translateX(-50%)'
-    }
+    function initOption(option){
+        if(!option){
+            return;
+        }
+        var scrollbarStyle = {
+            width: '10px',
+            background: '#f0f0f0',
+            position: 'absolute',
+            top: '0px',
+            right: '5px',
+            borderRadius: '5px'
+        }
+        var sliderStyle = {
+            width: '10px',
+            background: 'rgb(209,209,209)',
+            position: 'absolute',
+            borderRadius: '5px',
+            top: '0px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            msTransform: 'translateX(-50%)'//不设置的话edge、ie为auto
+        }
 
-    var _option = {};
+        _option = {};
+        _option.defaultScrollbarClassName = 'l-scrollbar';
+        _option.defaultSliderClassName = 'l-slider';
+        _option.scrollbarStyle = scrollbarStyle;
+        _option.sliderStyle = sliderStyle;
+        _option.wheelStep = 38;
+        _option.mode = 'y';//y-竖滚动条 x-横向滚动条
+        _option.isCreated = false;
+
+        iterateObj(option, function(op){
+            _option[op] = option[op];
+        });
+    }
 
     /**
      * @param option
@@ -33,48 +49,53 @@
      *           |mode:横向、纵向
      */
     function createScrollbar(option){
-        _option = option;
-        _option.wheelStep = option.wheelStep || 23;
+        initOption(option);
 
         var containerDOM = document.querySelector(option.container);
         var contentDOM = document.querySelector(option.content);
+        var scrollbar = document.querySelector('.' + _option.defaultScrollbarClassName);
+        var slider = document.querySelector('.' + _option.defaultSliderClassName);
 
-        var scrollbar = document.createElement('div');
-        scrollbar.className = scrollbarClassName;
-        var slider = document.createElement('div');
-        slider.className = sliderClassName;
-        scrollbar.appendChild(slider);
+        if(!scrollbar && !slider){
+            scrollbar = document.createElement('div');
+            scrollbar.className = _option.defaultScrollbarClassName;
+            slider = document.createElement('div');
+            slider.className = _option.defaultSliderClassName;
+        }
 
-        initSize(containerDOM, contentDOM, scrollbar, slider);
+        var isNeedScrollbar = initStyle(containerDOM, contentDOM, scrollbar, slider);
 
-        containerDOM.appendChild(scrollbar);
+        if(isNeedScrollbar && !_option.isCreated){
+            scrollbar.appendChild(slider);
+            containerDOM.appendChild(scrollbar);
+            _option.isCreated = true;
+        }
 
         initEventListener(containerDOM, contentDOM, scrollbar, slider);
     }
 
     ///初始化滚动条的尺寸
-    function initSize(container, content, scrollbar, slider){
+    function initStyle(container, content, scrollbar, slider){
         //  visibleH / contentH = sliderH / scrollbarH
         var containerHeight = container.clientHeight;
         var containerPadding = parseInt(getStyle(container).paddingTop) + parseInt(getStyle(container).paddingBottom);
         var visibleHeight = containerHeight - containerPadding;///减去上下内边距得到可是区域的高度
         var contentHeight = content.offsetHeight;//内容的总高度
 
+        if(contentHeight <= visibleHeight){
+            return false;
+        }
+
+        content.style.top = '0px';
         scrollbar.style.height = visibleHeight + 'px';
-        scrollbar.style.width = scrollbarStyle.width;
-        scrollbar.style.background = scrollbarStyle.color;
-        scrollbar.style.position = scrollbarStyle.position;
-        scrollbar.style.top = scrollbarStyle.top;
-        scrollbar.style.right = scrollbarStyle.right;
-        scrollbar.style.borderRadius = scrollbarStyle.borderRadius;
         slider.style.height = visibleHeight * visibleHeight / contentHeight + 'px';
-        slider.style.width = sliderStyle.width;
-        slider.style.background = sliderStyle.color;
-        slider.style.position = sliderStyle.position;
-        slider.style.borderRadius = sliderStyle.borderRadius;
-        slider.style.left = sliderStyle.left;
-        slider.style.transform = sliderStyle.transform;
-        slider.style.top = sliderStyle.top;//不设置的话edge、ie为auto
+
+        iterateObj(_option.scrollbarStyle, function(style){
+            scrollbar.style[style] = _option.scrollbarStyle[style];
+        });
+        iterateObj(_option.sliderStyle, function(style){
+            slider.style[style] = _option.sliderStyle[style];
+        });
 
         if(getStyle(container).position === 'static'){
             container.style.position = 'relative';
@@ -82,6 +103,11 @@
         if(getStyle(content).position === 'static'){
             content.style.position = 'relative';
         }
+        if(getStyle(container).overflow !== 'hidden'){
+            container.style.overflow = 'hidden';
+        }
+
+        return true;
     }
 
     ///注册滚动条的滚轮滚动事件、鼠标点击滚动事件
@@ -89,15 +115,13 @@
         toggleWheelListener(true, content, wheelHandler);
         toggleWheelListener(true, scrollbar, wheelHandler);
         toggleWheelListener(true, slider, wheelHandler);
-        
 
-        var timer;
+
         function wheelHandler(ev){
-            console.log(ev);
             ev = ev || window.event;
+
             window.clearTimeout(timer);
             timer = window.setTimeout(function(){
-                console.log(ev.target.className);
                 if(ev.wheelDelta){
                     if (ev.wheelDelta > 0) { //当滑轮向上滚动时  
                         if(parseInt(getStyle(slider).top) - _option.wheelStep >= 0){
@@ -105,15 +129,13 @@
                         }else{
                             scrollTo(0);
                         }
-                        console.log("滑轮向上滚动");  
-                    }else if(ev.wheelDelta < 0) { //当滑轮向下滚动时  
+                    }else if(ev.wheelDelta < 0) { //当滑轮向下滚动时
                         if(parseInt(getStyle(slider).top) + _option.wheelStep <= parseInt(scrollbar.clientHeight) - parseInt(slider.offsetHeight)){
                             scrollTo(parseInt(getStyle(slider).top) + _option.wheelStep);
                         }else{
                             scrollTo(parseInt(scrollbar.clientHeight) - parseInt(slider.offsetHeight));
                         }
-                        console.log("滑轮向下滚动");  
-                    }  
+                    }
                 }else if(ev.deltaY){//Firefox滑轮事件，!!!!Firefox兼容
                     if (ev.deltaY < 0) { //当滑轮向上滚动时  
                         if(parseInt(getStyle(slider).top) - _option.wheelStep >= 0){
@@ -121,17 +143,18 @@
                         }else{
                             scrollTo(0);
                         }
-                        console.log("滑轮向上滚动");  
-                    }else if(ev.deltaY > 0) { //当滑轮向下滚动时  
+                    }else if(ev.deltaY > 0) { //当滑轮向下滚动时
                         if(parseInt(getStyle(slider).top) + _option.wheelStep <= parseInt(scrollbar.clientHeight) - parseInt(slider.offsetHeight)){
                             scrollTo(parseInt(getStyle(slider).top) + _option.wheelStep);
                         }else{
                             scrollTo(parseInt(scrollbar.clientHeight) - parseInt(slider.offsetHeight));
                         }
-                        console.log("滑轮向下滚动");  
-                    }  
+                    }
                 }
             }, 15);
+
+            ev.returnValue = false;//滚动穿透
+            return false;//滚动穿透
         }
 
         ///滚动内容区域和滑块，滑块带动内容区域滑动
@@ -145,11 +168,9 @@
         //drag slider
         var topMouseToScreen = 0;
         var topSliderToScrollbar = 0;
-        var mouseTimer;
         slider.addEventListener('mousedown', function(ev){
             //获得鼠标相对于scrollbar的位置
             topMouseToScreen = ev.screenY;
-            console.log(getStyle(slider).top);
             topSliderToScrollbar = parseInt(getStyle(slider).top);
             document.getElementsByTagName('body')[0].addEventListener('mousemove', mouseMoving, false);
             document.getElementsByTagName('body')[0].addEventListener('mouseup', function(){
@@ -160,15 +181,12 @@
             document.getElementsByTagName('body')[0].onselectstart = new Function('event.returnValue=false;');
             return false;
         }, false);
-        
+
         function mouseMoving(ev){
-            window.clearTimeout(mouseTimer);
-            mouseTimer = window.setTimeout(function(){
-                var topMoving = ev.screenY - topMouseToScreen;
-                if(topSliderToScrollbar + topMoving >= 0 && topSliderToScrollbar + topMoving <= parseInt(scrollbar.clientHeight) - parseInt(slider.offsetHeight)){
-                    scrollTo(topSliderToScrollbar + topMoving);
-                }
-            }, 0);
+            var topMoving = ev.screenY - topMouseToScreen;
+            if(topSliderToScrollbar + topMoving >= 0 && topSliderToScrollbar + topMoving <= parseInt(scrollbar.clientHeight) - parseInt(slider.offsetHeight)){
+                scrollTo(topSliderToScrollbar + topMoving);
+            }
             return false;
         }
 
@@ -186,6 +204,14 @@
             el.addEventListener(support, foo, false);
         }else{
             el.removeEventListener(support, foo, false);
+        }
+    }
+
+    function iterateObj(obj, callback){
+        for(var prop in obj){
+            if (obj.hasOwnProperty(prop)){
+                callback && callback(prop);
+            }
         }
     }
 
