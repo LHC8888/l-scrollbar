@@ -9,19 +9,23 @@
         .container{
             width: 360px;
             height: 300px;
-            background: rgb(230, 230, 230);
+            background: rgb(190, 190, 190);
             overflow: hidden;
             padding: 10px;
         }
         .content{
-            width: 340px;
+            width: 480px;
             border: 2px solid black;
+        }
+        .poem3_content, .poem5_content{
+            width: 300px;
         }
     </style>
 </head>
 <body>
-    <div class='container' >
-        <div class='content' >
+    <p>水平滚动条+垂直滚动条</p>
+    <div class='container poem1' >
+        <div class='content poem1_content' >
             梦游天姥吟留别  [唐]李白<br><br>
             海客谈瀛洲，烟涛微茫信难求。<br>
             越人语天姥，云霞明灭或可睹。<br>
@@ -47,11 +51,121 @@
             安能摧眉折腰事权贵，使我不得开心颜！<br>
         </div>
     </div>
+    <br>
+    <div class='container poem2' >
+        <div class='content poem2_content' >
+            蜀道难  [唐]李白<br>
+            噫吁嚱，危乎高哉！<br>
+            蜀道之难，难于上青天。<br>
+            蚕丛及鱼凫，开国何芒然。<br>
+            尔来四万八千岁，不与秦塞通人烟。<br>
+            西当太白有鸟道，可以横绝峨眉巅。<br>
+            地崩山摧壮士死，然后天梯石栈相钩连。<br>
+            上有六龙回日之高标，下有冲波逆折之回川。<br>
+            黄鹤之飞尚不得过，猿猱欲度愁攀援。<br>
+            青泥何盘盘，百步九折萦岩峦。<br>
+            扪参历井仰胁息，以手抚膺坐长叹。<br>
+
+            问君西游何时还？畏途巉岩不可攀。<br>
+            但见悲鸟号古木，雄飞雌从绕林间。<br>
+            又闻子规啼夜月，愁空山。<br>
+            蜀道之难，难于上青天，使人听此凋朱颜！<br>
+            连峰去天不盈尺，枯松倒挂倚绝壁。<br>
+            飞湍瀑流争喧豗，砯崖转石万壑雷。<br>
+            其险也如此，嗟尔远道之人胡为乎来哉！<br>
+
+            剑阁峥嵘而崔嵬，一夫当关，万夫莫开。<br>
+            所守或匪亲，化为狼与豺。<br>
+            朝避猛虎，夕避长蛇；磨牙吮血，杀人如麻。<br>
+            锦城虽云乐，不如早还家。<br>
+            蜀道之难，难于上青天，侧身西望长咨嗟！<br>
+        </div>
+    </div>    
+    <p>垂直滚动条</p>
+    <div class='container poem3' >
+        <div class='content poem3_content' >
+            静夜思  [唐]李白<br><br>
+            床前明月光，<br>
+            疑是地上霜。<br>
+            举头望明月，<br>
+            低头思故乡。<br>
+            床前明月光，<br>
+            疑是地上霜。<br>
+            举头望明月，<br>
+            低头思故乡。<br>
+            床前明月光，<br>
+            疑是地上霜。<br>
+            举头望明月，<br>
+            低头思故乡。<br>
+            床前明月光，<br>
+            疑是地上霜。<br>
+            举头望明月，<br>
+            低头思故乡。<br>
+        </div>
+    </div>
+    <p>水平滚动条</p>
+    <div class='container poem4' >
+        <div class='content poem4_content' >
+            春晓  [唐]孟浩然<br><br>
+            春眠不觉晓，<br>
+            处处闻啼鸟。<br>
+            夜来风雨声，<br>
+            花落知多少。<br>
+        </div>
+    </div>
+    <p>无滚动条</p>
+    <div class='container poem5' >
+        <div class='content poem5_content' >
+            赠汪沦  [唐]李白<br><br>
+            李白乘舟将欲行，<br>
+            忽闻岸上踏歌声。<br>
+            桃花潭水深千尺，<br>
+            不及汪伦送我情。<br>
+        </div>
+    </div>
     <script src='./scrollbar.js' ></script>
     <script>
+        ///测试当页面需要初始化多个滚动条时
         createScrollbar({
-            container: '.container',
-            content: '.content'
+            container: '.poem1',
+            content: '.poem1_content'
+        });
+
+        createScrollbar({
+            container: '.poem2',
+            content: '.poem2_content',
+            scrollbarYStyle: {
+                background: 'blue',
+                width: '20px',
+                borderRadius: '20px'
+            },
+            sliderXStyle: {
+                background: 'yellow',
+                height: '10px'
+            }
+        });
+
+        ///测试多次初始化会不会生成多次
+        createScrollbar({
+            container: '.poem1',
+            content: '.poem1_content'
+        });
+        createScrollbar({
+            container: '.poem2',
+            content: '.poem2_content'
+        });
+
+        createScrollbar({
+            container: '.poem3',
+            content: '.poem3_content'
+        });
+        createScrollbar({
+            container: '.poem4',
+            content: '.poem4_content'
+        });
+        createScrollbar({
+            container: '.poem5',
+            content: '.poem5_content'
         });
     </script>
 </body>
