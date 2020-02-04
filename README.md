@@ -1,6 +1,8 @@
 # l-scrollbar
 custom scrollbar 自定义滚动条，自动在容器内部生成垂直滚动条和水平滚动条。
 
+兼容IE9+
+
 ```
 ///用法：createScrollbar(option: Object)
 createScrollbar({
