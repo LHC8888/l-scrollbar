@@ -1,5 +1,5 @@
 # l-scrollbar
-自定义滚动条，自动在容器内部生成垂直滚动条和水平滚动条。
+custom scrollbar 自定义滚动条，自动在容器内部生成垂直滚动条和水平滚动条。
 
 ```
 ///用法：createScrollbar(option: Object)
